@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NINJA STORE | نينجا ستور - الكائن الحي الأسطوري</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Permanent+Marker&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-green: #00ff66;
+            --neon-pink: #ff00ff;
+            --deep-black: #050505;
+            --glow: 0 0 20px var(--neon-green), 0 0 40px rgba(0, 255, 102, 0.3);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--deep-black);
+            color: white;
+            overflow-x: hidden;
+            cursor: none; /* تخصيص مؤشر الفأرة */
+        }
+
+        /* --- محرك الأنيميشن الحي --- */
+        @keyframes breathing {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.01); filter: brightness(1.3); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px var(--neon-green); }
+            50% { box-shadow: 0 0 50px var(--neon-green), 0 0 80px var(--neon-green); }
+        }
+
+        @keyframes liquid-bg {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 30% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+
+        /* --- الزر المشع الخارق (The Ultra Button) --- */
+        .ultra-checkout-btn {
+            background: linear-gradient(45deg, #00ff66, #adff00);
+            color: black;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: pulse-glow 2s infinite;
+            border: 4px solid white;
+            text-transform: uppercase;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+        }
+
+        .ultra-checkout-btn:hover {
+            transform: scale(1.1) rotate(-2deg);
+            letter-spacing: 5px;
+        }
+
+        /* --- جزيئات النينجا (Particles) --- */
+        #living-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- مؤشر فأرة نينجا --- */
+        #custom-cursor {
+            width: 25px; height: 25px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            box-shadow: var(--glow);
+            transition: transform 0.1s;
+        }
+
+        /* --- كروت المنتجات ثلاثية الأبعاد --- */
+        .product-card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 255, 102, 0.1);
+        }
+
+        .product-card-3d:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.2);
+        }
+
+        /* --- تأثير تحطم الزجاج --- */
+        .glass-shard {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        /* --- شريط الحالة العلوي --- */
+        .status-bar {
+            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+            height: 2px;
+            width: 100%;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body class="antialiased select-none">
+
+    <div id="custom-cursor"></div>
+    <div class="status-bar animate-pulse"></div>
+    <canvas id="living-bg"></canvas>
+
+    <!-- الهيدر الأسطوري -->
+    <header class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-2xl border-b border-neon-green/30 px-8 py-5 flex justify-between items-center">
+        <div class="flex items-center gap-4 group cursor-pointer">
+            <div class="w-14 h-14 bg-neon-green rounded-full flex items-center justify-center shadow-[0_0_30px_var(--neon-green)] group-hover:rotate-[360deg] transition-transform duration-1000">
+                <i class="fas fa-user-ninja text-black text-3xl"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-3xl font-black tracking-tighter text-neon-green drop-shadow-[0_0_10px_#00ff66]">نينجا ستور</span>
+                <span class="text-[10px] font-bold text-white uppercase tracking-[5px]">UNDERGROUND MARKET</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <button onclick="toggleAdmin()" class="text-white/40 hover:text-neon-green transition-colors text-xl">
+                <i class="fas fa-terminal"></i>
+            </button>
+            <div onclick="toggleCart()" class="relative cursor-pointer group">
+                <div class="absolute inset-0 bg-neon-green blur-xl opacity-20 group-hover:opacity-60 transition-opacity"></div>
+                <div class="relative bg-white/5 border border-white/20 w-16 h-16 rounded-2xl flex items-center justify-center group-hover:border-neon-green transition-all">
+                    <i class="fas fa-shopping-bag text-2xl group-hover:scale-110 transition-transform"></i>
+                    <span id="cart-badge" class="absolute -top-2 -right-2 bg-neon-green text-black font-black w-7 h-7 rounded-full flex items-center justify-center text-sm shadow-lg">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- قسم الأبطال (Hero) -->
+    <section class="relative pt-48 pb-20 px-8 text-center overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-green/10 rounded-full blur-[120px] animate-pulse"></div>
+        <h1 class="relative text-6xl md:text-9xl font-black leading-none mb-6">
+            تسوق مثل <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-white italic">شبح النينجا</span>
+        </h1>
+        <p class="relative text-xl text-gray-400 font-bold max-w-2xl mx-auto border-r-4 border-neon-green pr-4">
+            نحن لا نبيع المنتجات، نحن نوصل المهام. أسرع خدمة توصيل في العالم السفلي.
+        </p>
+    </section>
+
+    <!-- فلاتر حية -->
+    <div class="sticky top-[96px] z-40 bg-black/40 backdrop-blur-md py-6 border-b border-white/5">
+        <div class="flex gap-4 px-8 overflow-x-auto no-scrollbar justify-center">
+            <button onclick="filter('all')" class="cat-btn active px-10 py-4 rounded-full font-black text-sm uppercase tracking-widest border-2 border-white/10 hover:border-neon-green transition-all">الكل</button>
+            <button onclick="filter('fresh')" class="cat-btn px-10 py-4 rounded-full font-black text-sm uppercase tracking-widest border-2 border-white/10 hover:border-neon-green transition-all">طازج</button>
+            <button onclick="filter('energy')" class="cat-btn px-10 py-4 rounded-full font-black text-sm uppercase tracking-widest border-2 border-white/10 hover:border-neon-green transition-all">طاقة</button>
+            <button onclick="filter('snacks')" class="cat-btn px-10 py-4 rounded-full font-black text-sm uppercase tracking-widest border-2 border-white/10 hover:border-neon-green transition-all">سناكس</button>
+        </div>
+    </div>
+
+    <!-- شبكة المنتجات (2 أعمدة دائماً) -->
+    <main class="p-4 md:p-8 max-w-7xl mx-auto">
+        <div id="grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+            <!-- المنتجات تحقن هنا -->
+        </div>
+    </main>
+
+    <!-- السلة الجانبية المشعة -->
+    <div id="cart-drawer" class="fixed inset-y-0 left-0 w-full md:w-[500px] bg-black/95 z-[60] transform -translate-x-full transition-transform duration-700 border-r border-neon-green/50 flex flex-col shadow-[50px_0_100px_rgba(0,255,102,0.1)]">
+        <div class="p-8 border-b border-white/10 flex justify-between items-center">
+            <h2 class="text-4xl font-black text-neon-green italic">معداتك المجهزة</h2>
+            <button onclick="toggleCart()" class="text-4xl hover:rotate-90 transition-transform">&times;</button>
+        </div>
+
+        <div id="cart-list" class="flex-1 overflow-y-auto p-8 space-y-6">
+            <!-- عناصر السلة -->
+        </div>
+
+        <!-- المنطقة الذهبية: زر الدفع الخارق -->
+        <div class="p-8 bg-white/5 border-t border-white/10 space-y-6">
+            <div class="flex justify-between items-end">
+                <span class="text-gray-400 font-bold uppercase">المجموع النهائي للمهمة:</span>
+                <span id="cart-total" class="text-5xl font-black text-neon-green">0 د.ج</span>
+            </div>
+
+            <div class="relative group">
+                <div class="absolute -inset-2 bg-neon-green blur-2xl opacity-40 group-hover:opacity-100 transition duration-1000"></div>
+                <button onclick="openCheckout()" class="ultra-checkout-btn w-full py-10 rounded-2xl flex items-center justify-center gap-6 overflow-hidden">
+                    <span class="shimmer absolute inset-0"></span>
+                    <i class="fas fa-bolt-lightning animate-bounce"></i>
+                    إتمام المهمة الآن
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+            <p class="text-center text-[10px] text-gray-500 font-bold tracking-[3px]">توصيل فوري خلال 15 دقيقة</p>
+        </div>
+    </div>
+
+    <!-- مودال إتمام الطلب الشفاف والمشع -->
+    <div id="checkout-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
+        <div class="bg-white/5 border-2 border-neon-green p-10 rounded-[3rem] w-full max-w-2xl space-y-8 relative overflow-hidden shadow-[0_0_100px_rgba(0,255,102,0.2)]">
+            <div class="text-center space-y-2">
+                <div class="inline-block px-6 py-2 bg-neon-green text-black font-black rounded-full text-xs mb-4">خطوة أخيرة للنجاح</div>
+                <h2 class="text-5xl font-black uppercase italic text-white">بيانات العميل</h2>
+            </div>
+
+            <div class="grid gap-6">
+                <div class="relative group">
+                    <input type="text" id="name" required class="w-full bg-transparent border-b-2 border-white/20 p-6 text-2xl outline-none focus:border-neon-green transition-all peer" placeholder=" ">
+                    <label class="absolute right-0 top-6 text-gray-500 text-xl pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-neon-green peer-focus:text-sm">الاسم بالكامل</label>
+                </div>
+                <div class="relative group">
+                    <input type="tel" id="phone" required class="w-full bg-transparent border-b-2 border-white/20 p-6 text-2xl outline-none focus:border-neon-green transition-all peer" placeholder=" ">
+                    <label class="absolute right-0 top-6 text-gray-500 text-xl pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-neon-green peer-focus:text-sm">رقم النينجا (الهاتف)</label>
+                </div>
+                <div class="relative group">
+                    <input type="text" id="addr" required class="w-full bg-transparent border-b-2 border-white/20 p-6 text-2xl outline-none focus:border-neon-green transition-all peer" placeholder=" ">
+                    <label class="absolute right-0 top-6 text-gray-500 text-xl pointer-events-none transition-all peer-focus:-top-4 peer-focus:text-neon-green peer-focus:text-sm">إحداثيات التوصيل (العنوان)</label>
+                </div>
+
+                <button onclick="autoGPS()" id="gps-btn" class="w-full py-5 bg-white/5 border border-neon-green/30 rounded-2xl text-neon-green font-black flex items-center justify-center gap-4 hover:bg-neon-green/10 transition-all">
+                    <i class="fas fa-map-location-dot animate-pulse"></i>
+                    تفعيل الرادار التلقائي (GPS)
+                </button>
+            </div>
+
+            <div class="flex gap-6 pt-6">
+                <button onclick="closeCheckout()" class="flex-1 py-6 bg-white/5 rounded-2xl font-black hover:bg-white/10 transition-all">انسحاب</button>
+                <button onclick="confirmMission()" class="flex-1 py-6 bg-neon-green text-black font-black rounded-2xl shadow-[0_0_40px_rgba(0,255,102,0.4)] hover:scale-105 transition-all">تأكيد المهمة!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة تحكم النينجا (Admin) -->
+    <div id="admin-panel" class="fixed inset-0 z-[200] hidden bg-[#050505] p-8 overflow-y-auto">
+        <div class="max-w-6xl mx-auto space-y-10">
+            <div class="flex justify-between items-center border-b border-white/10 pb-8">
+                <h1 class="text-5xl font-black italic text-neon-green tracking-widest">MISSION CONTROL</h1>
+                <button onclick="toggleAdmin()" class="px-8 py-3 bg-red-600 text-white font-black rounded-lg">خروج</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white/5 p-10 rounded-3xl border border-white/10">
+                    <p class="text-gray-400 font-bold mb-2">إجمالي مبيعات اليوم</p>
+                    <h3 id="admin-total" class="text-5xl font-black text-neon-green">0 د.ج</h3>
+                </div>
+                <div class="bg-white/5 p-10 rounded-3xl border border-white/10">
+                    <p class="text-gray-400 font-bold mb-2">المهمات النشطة</p>
+                    <h3 id="admin-count" class="text-5xl font-black text-white">0</h3>
+                </div>
+            </div>
+            <div id="admin-list" class="space-y-6">
+                <!-- الطلبات -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- البيانات ---
+        const products = [
+            { id: 1, name: "حليب نينجا عضوي", price: 130, cat: "fresh", img: "https://images.unsplash.com/photo-1563636619-e9107da5a1bb?w=500" },
+            { id: 2, name: "خبز أسود حاد", price: 30, cat: "fresh", img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500" },
+            { id: 3, name: "مشروب طاقة سيبراني", price: 250, cat: "energy", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500" },
+            { id: 4, name: "بيض ذهبي (30 حبة)", price: 690, cat: "fresh", img: "https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=500" },
+            { id: 5, name: "شبس نينجا المدمر", price: 150, cat: "snacks", img: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500" },
+            { id: 6, name: "ماء معدني كريستالي", price: 50, cat: "fresh", img: "https://images.unsplash.com/photo-1548919973-5dea585f3968?w=500" },
+            { id: 7, name: "قهوة نينجا المركزة", price: 400, cat: "energy", img: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=500" },
+            { id: 8, name: "شوكولاتة داكنة", price: 180, cat: "snacks", img: "https://images.unsplash.com/photo-1511381939415-e44015466834?w=500" }
+        ];
+
+        let cart = [];
+        let gpsData = null;
+
+        // --- محرك الخلفية الحية (Particles Engine) ---
+        const canvas = document.getElementById('living-bg');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+
+        function initParticles() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for(let i=0; i<80; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3,
+                    color: '#00ff66',
+                    speedX: Math.random() * 1 - 0.5,
+                    speedY: Math.random() * 1 - 0.5
+                });
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.speedX; p.y += p.speedY;
+                if(p.x > canvas.width || p.x < 0) p.speedX *= -1;
+                if(p.y > canvas.height || p.y < 0) p.speedY *= -1;
+                
+                // ربط الجزيئات بالماوس
+                let dx = mouse.x - p.x; let dy = mouse.y - p.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if(dist < 150) {
+                    ctx.beginPath(); ctx.strokeStyle = 'rgba(0,255,102,0.2)';
+                    ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+                }
+
+                ctx.fillStyle = p.color;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x; mouse.y = e.y;
+            const cursor = document.getElementById('custom-cursor');
+            cursor.style.left = e.x + 'px'; cursor.style.top = e.y + 'px';
+        });
+
+        // --- إدارة المتجر ---
+        function renderItems(data) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = data.map((p, i) => `
+                <div class="product-card-3d p-4 rounded-[2rem] relative group" style="animation: appear 0.8s ${i*0.1}s both">
+                    <div class="relative overflow-hidden rounded-[1.5rem] aspect-square mb-6">
+                        <img src="${p.img}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-4 right-4 bg-neon-green text-black px-4 py-1 rounded-full font-black text-xs">TOP SECRET</div>
+                    </div>
+                    <h3 class="text-xl font-black mb-2">${p.name}</h3>
+                    <div class="flex justify-between items-center">
+                        <span class="text-3xl font-black text-neon-green">${p.price}<small class="text-xs mr-1 text-white">د.ج</small></span>
+                        <button onclick="add(${p.id})" class="w-14 h-14 bg-white text-black rounded-2xl flex items-center justify-center hover:bg-neon-green transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                            <i class="fas fa-plus text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function add(id) {
+            const p = products.find(i => i.id === id);
+            const exists = cart.find(i => i.id === id);
+            if(exists) exists.qty++;
+            else cart.push({...p, qty: 1});
+            updateUI();
+            
+            // انيميشن الإضافة
+            const badge = document.getElementById('cart-badge');
+            badge.classList.add('scale-[2]', 'rotate-[360deg]');
+            setTimeout(() => badge.classList.remove('scale-[2]', 'rotate-[360deg]'), 500);
+        }
+
+        function updateUI() {
+            const list = document.getElementById('cart-list');
+            const total = document.getElementById('cart-total');
+            const badge = document.getElementById('cart-badge');
+
+            list.innerHTML = cart.map(i => `
+                <div class="flex items-center gap-6 bg-white/5 p-5 rounded-[1.5rem] border border-white/5">
+                    <img src="${i.img}" class="w-24 h-24 object-cover rounded-xl border border-white/10">
+                    <div class="flex-1">
+                        <h4 class="text-xl font-black">${i.name}</h4>
+                        <p class="text-neon-green font-black">${i.price} د.ج</p>
+                    </div>
+                    <div class="flex items-center gap-4 bg-black px-4 py-2 rounded-xl">
+                        <button onclick="change(${i.id}, -1)" class="hover:text-neon-green transition-colors">-</button>
+                        <span class="font-black text-xl">${i.qty}</span>
+                        <button onclick="change(${i.id}, 1)" class="hover:text-neon-green transition-colors">+</button>
+                    </div>
+                </div>
+            `).join('');
+
+            const sum = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+            total.innerText = sum + ' د.ج';
+            badge.innerText = cart.reduce((a, b) => a + b.qty, 0);
+        }
+
+        function change(id, d) {
+            const i = cart.find(x => x.id === id);
+            i.qty += d;
+            if(i.qty <= 0) cart = cart.filter(x => x.id !== id);
+            updateUI();
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-drawer').classList.toggle('-translate-x-full');
+        }
+
+        function filter(c) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active', 'border-neon-green', 'text-neon-green'));
+            event.target.classList.add('active', 'border-neon-green', 'text-neon-green');
+            const filtered = c === 'all' ? products : products.filter(p => p.cat === c);
+            renderItems(filtered);
+        }
+
+        // --- إتمام المهمة ---
+        function openCheckout() {
+            if(cart.length === 0) return alert("سلتك فارغة يا نينجا!");
+            document.getElementById('checkout-modal').classList.remove('hidden');
+            document.getElementById('checkout-modal').classList.add('flex');
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkout-modal').classList.add('hidden');
+            document.getElementById('checkout-modal').classList.remove('flex');
+        }
+
+        function autoGPS() {
+            const btn = document.getElementById('gps-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري اختراق الإحداثيات...';
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((p) => {
+                    gpsData = { lat: p.coords.latitude, lng: p.coords.longitude };
+                    btn.innerHTML = '<i class="fas fa-check text-neon-green"></i> تم تحديد موقعك في الرادار';
+                }, () => {
+                    alert("الرادار معطل. ادخل العنوان يدوياً.");
+                    btn.innerText = "فشل التحديد - ادخل العنوان";
+                });
+            }
+        }
+
+        function confirmMission() {
+            const n = document.getElementById('name').value;
+            const ph = document.getElementById('phone').value;
+            const ad = document.getElementById('addr').value;
+
+            if(!n || !ph || !ad) return alert("أكمل بيانات المهمة أولاً!");
+
+            // تأثير التحطم الخارق
+            shatterScreen();
+
+            setTimeout(() => {
+                const mission = {
+                    id: 'NINJA-' + Math.floor(Math.random()*99999),
+                    name: n, phone: ph, address: ad,
+                    items: cart, total: document.getElementById('cart-total').innerText,
+                    gps: gpsData, date: new Date().toLocaleString('ar-DZ')
+                };
+
+                let missions = JSON.parse(localStorage.getItem('ninja_missions') || '[]');
+                missions.push(mission);
+                localStorage.setItem('ninja_missions', JSON.stringify(missions));
+
+                // شاشة النجاح النهائية
+                document.body.innerHTML = `
+                    <div class="fixed inset-0 bg-black flex items-center justify-center p-10">
+                        <div class="text-center space-y-10 animate-pulse">
+                            <div class="w-40 h-40 bg-neon-green rounded-full flex items-center justify-center mx-auto shadow-[0_0_100px_rgba(0,255,102,1)]">
+                                <i class="fas fa-check text-black text-8xl"></i>
+                            </div>
+                            <h1 class="text-7xl font-black italic">MISSION COMMENCED!</h1>
+                            <p class="text-2xl text-gray-400">النينجا في الطريق إليك الآن. استعد.</p>
+                            <div class="text-neon-green font-mono text-xl">${mission.id}</div>
+                            <button onclick="location.reload()" class="px-16 py-6 bg-white text-black font-black rounded-full text-2xl hover:scale-110 transition-transform">رجوع للمقر</button>
+                        </div>
+                    </div>
+                `;
+            }, 1000);
+        }
+
+        function shatterScreen() {
+            for(let i=0; i<60; i++) {
+                const shard = document.createElement('div');
+                shard.className = 'glass-shard';
+                const size = Math.random() * 60 + 20;
+                shard.style.width = size + 'px';
+                shard.style.height = size + 'px';
+                shard.style.left = '50%';
+                shard.style.top = '50%';
+                shard.style.clipPath = `polygon(${Math.random()*100}% 0, 100% ${Math.random()*100}%, 0 100%)`;
+                shard.style.background = i % 2 === 0 ? '#00ff66' : 'white';
+                document.body.appendChild(shard);
+
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 1500 + 500;
+                shard.animate([
+                    { transform: 'translate(0,0) rotate(0)', opacity: 1 },
+                    { transform: `translate(${Math.cos(angle)*velocity}px, ${Math.sin(angle)*velocity}px) rotate(${Math.random()*720}deg)`, opacity: 0 }
+                ], { duration: 1000, easing: 'cubic-bezier(0, .9, .9, 1)', fill: 'forwards' });
+            }
+        }
+
+        // --- الإدارة ---
+        function toggleAdmin() {
+            const p = prompt("PASSWORD:");
+            if(p === 'nouh1234') {
+                document.getElementById('admin-panel').classList.toggle('hidden');
+                renderAdmin();
+            }
+        }
+
+        function renderAdmin() {
+            const missions = JSON.parse(localStorage.getItem('ninja_missions') || '[]');
+            const list = document.getElementById('admin-list');
+            const totalVal = missions.reduce((a, b) => a + parseInt(b.total), 0);
+            
+            document.getElementById('admin-total').innerText = totalVal + ' د.ج';
+            document.getElementById('admin-count').innerText = missions.length;
+
+            list.innerHTML = missions.reverse().map(m => `
+                <div class="bg-white/5 border border-white/10 p-8 rounded-[2rem] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div class="space-y-2">
+                        <span class="text-neon-green font-mono text-sm">${m.id} | ${m.date}</span>
+                        <h4 class="text-3xl font-black">${m.name}</h4>
+                        <p class="text-gray-400 font-bold italic">${m.address} - ${m.phone}</p>
+                        <div class="text-xs opacity-50">${m.items.map(i => i.name + ' x'+i.qty).join(', ')}</div>
+                    </div>
+                    <div class="text-right flex flex-col gap-4">
+                        <span class="text-4xl font-black text-white">${m.total}</span>
+                        ${m.gps ? `<a href="https://maps.google.com/?q=${m.gps.lat},${m.gps.lng}" target="_blank" class="text-blue-500 font-black hover:underline">GPS LOCATION 📍</a>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // تشغيل المحركات
+        window.onload = () => {
+            initParticles();
+            animateParticles();
+            renderItems(products);
+            
+            // تأثير 3D للكروت
+            window.addEventListener('mousemove', (e) => {
+                const cards = document.querySelectorAll('.product-card-3d');
+                cards.forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width - 0.5;
+                    const y = (e.clientY - rect.top) / rect.height - 0.5;
+                    card.style.transform = `perspective(1000px) rotateX(${y * 20}deg) rotateY(${x * 20}deg) translateY(-10px)`;
+                });
+            });
+        };
+
+        window.onresize = initParticles;
+    </script>
+
+    <style>
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(50px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</body>
+</html>
